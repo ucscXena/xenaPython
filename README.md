@@ -51,3 +51,13 @@ Python API for Xena Hub
 ##### 6. Find out hub id, dataset id
     use xena browser datasets tool:  https://xenabrowser.net/datapages/
 
+
+
+#### Contact
+     http://xena.ucsc.edu/
+     https://groups.google.com/forum/#!forum/ucsc-cancer-genomics-browser
+     genome-cancer@soe.ucsc.edu
+
+
+#### Acknowledgement
+     https://github.com/GiriB

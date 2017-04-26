@@ -3,6 +3,10 @@ Python API for Xena Hub
 
 ---------
 
+#### Requirement
+    python 2
+
+
 #### Installation
     pip install xenaPython
 

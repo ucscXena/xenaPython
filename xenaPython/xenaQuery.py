@@ -57,6 +57,7 @@ Looking up sample ids for the TCGA LGG cohort.
 
 
 import re
+from functools import reduce
 
 def compose1(f, g):
     def composed(*args, **kwargs):
@@ -178,14 +179,14 @@ dataset_gene_str = """
 """
 
 import json
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 headers = { 'Content-Type' : "text/plain" }
 
 def post(url, query):
     """POST a xena data query to the given url."""
-    req = urllib2.Request(url + '/data/', query, headers)
-    response = urllib2.urlopen(req)
+    req = urllib2.request.Request(url + '/data/', query, headers)
+    response = urllib.request.urlopen(req)
     result = response.read().decode('utf-8')
     return result
 

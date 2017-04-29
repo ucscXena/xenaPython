@@ -64,5 +64,4 @@ Python API for Xena Hub
 
 
 #### Acknowledgement
-    @GiriB
-     https://github.com/GiriB
+    [@GiriB](https://github.com/GiriB)

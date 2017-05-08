@@ -5,7 +5,7 @@ import xenaPython as xena
 hub = "https://toil.xenahubs.net"
 dataset = "tcga_RSEM_gene_tpm"
 samples = ["TCGA-02-0047-01","TCGA-02-0055-01","TCGA-02-2483-01","TCGA-02-2485-01","TCGA-04-1331-01","TCGA-04-1332-01"]
-probes = ["ENSG00000000003.14', 'ENSG00000000005.5', 'ENSG00000000419.12"]
+probes = ["ENSG00000000003.14", "ENSG00000000005.5", "ENSG00000000419.12"]
 print(xena.xenaAPI.Probes_values (hub, dataset, samples, probes))
 
 # use case 2

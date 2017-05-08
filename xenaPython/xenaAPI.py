@@ -5,7 +5,7 @@ def Gene_values (hub, dataset, samples, gene):
     return values[0]["scores"][0]
 
 def Genes_values (hub, dataset, samples, genes):
-    values = map(lambda x: x["scores"][0], xena.dataset_gene_values (hub, dataset, samples, genes))
+    values = [x["scores"][0] for x in xena.dataset_gene_values (hub, dataset, samples, genes)]
     return values
 
 def Probe_values (hub, dataset, samples, probe):

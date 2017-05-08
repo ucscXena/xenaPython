@@ -11,6 +11,10 @@ Python API for Xena Hub
     pip install xenaPython
 
 
+#### Upgrade Installation
+    pip install --upgrade xenaPython
+
+
 #### Usage
 
     >>import xenaPython as xena

@@ -1,4 +1,5 @@
 sudo pip install twine
 sudo pip install wheel
+# edit setup.py with new version number:
 python setup.py sdist bdist_wheel 
 twine upload dist/*

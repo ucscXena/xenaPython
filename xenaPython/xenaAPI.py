@@ -21,3 +21,6 @@ def dataset_samples (hub,dataset):
 
 def dataset_fields (hub, dataset):
     return xena.dataset_field (hub, dataset)
+
+def all_cohorts(hub):
+    return xena.all_cohorts(hub)

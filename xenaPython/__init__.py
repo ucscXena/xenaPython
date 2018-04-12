@@ -1,2 +1,2 @@
-import xenaAPI
-import xenaQuery
+from . import xenaAPI
+from . import xenaQuery

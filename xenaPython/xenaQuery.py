@@ -4,7 +4,7 @@ Utilities for xena queries.
 A basic query example.
 Queries are scheme expressions.
 
->>> import xena_query as xena
+>>> import xenaPython.xenaQuery as xena
 >>> xena.post("https://ucscpublic.xenahubs.net", "(+ 1 2)")
 '3.0'
 
@@ -192,7 +192,7 @@ headers = { 'Content-Type' : "text/plain" }
 
 def post(url, query):
     """POST a xena data query to the given url."""
-    req = Request(url + '/data/', query, headers)
+    req = Request(url + '/data/', str.encode(query), headers)
     response = urlopen(req)
     result = response.read().decode('utf-8')
     return result

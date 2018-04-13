@@ -95,7 +95,8 @@ samples = xena.dataset_samples(host, dataset, None)
 QUERIES = {}
 def _create_methods():
     "inject query methods into global namespace"
-    for method in glob('xenaPython/queries/*.xq'):
+    xq = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'queries', '*.xq')
+    for method in glob(xq):
         with open(method) as x:
             query = x.read()
         name = _to_snake(os.path.splitext(os.path.basename(method))[0])

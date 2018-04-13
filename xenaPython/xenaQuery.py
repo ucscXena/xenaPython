@@ -250,3 +250,28 @@ def dataset_gene_probes_values (host,dataset,samples, gene):
 def dataset_type (host, dataset):
     return json.loads(post(host, dataset_type_str % (quote(dataset))))
 
+def quote(s):
+    "quote a string value"
+    return 'nil' if s is None else '"' + s + '"' # should escape "
+
+
+def arrayfmt(l):
+    "format an array"
+    return '[' + ' '.join([marshall_param(x) for x in l]) + ']'
+
+def marshall_param(p):
+    "format a parameter"
+    if isinstance(p, str):
+        return quote(p)
+
+    if isinstance(p, list):
+        return arrayfmt(p)
+
+    if p is None:
+        return 'nil'
+    return str(p)
+
+def call(query_fn, params):
+    "marshall parameters and build the lisp call form"
+    return '(%s %s)' % (
+        query_fn, ' '.join(map(marshall_param, params)))

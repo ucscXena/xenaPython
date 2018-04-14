@@ -67,6 +67,3 @@ Python API for Xena Hub
      genome-cancer@soe.ucsc.edu
 
 
-#### Acknowledgement
-[@GiriB](https://github.com/GiriB)
-

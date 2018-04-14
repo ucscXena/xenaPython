@@ -4,6 +4,7 @@ setup(
     name="xenaPython",
     version="1.0.7",
     packages=find_packages(),
+    include_package_data=True,
     author = '@jingchunzhu, @acthp',
     author_email = 'jzhu@soe.ucsc.com',
     description = 'XENA python API',

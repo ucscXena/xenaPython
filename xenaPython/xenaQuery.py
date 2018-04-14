@@ -59,6 +59,11 @@ Looking up sample ids for the TCGA LGG cohort.
 import re
 from functools import reduce
 
+try:
+    basestring
+except NameError:
+    basestring = (str, bytes)
+
 def compose1(f, g):
     def composed(*args, **kwargs):
         return f(g(*args, **kwargs))
@@ -192,7 +197,7 @@ headers = { 'Content-Type' : "text/plain" }
 
 def post(url, query):
     """POST a xena data query to the given url."""
-    req = Request(url + '/data/', str.encode(query), headers)
+    req = Request(url + '/data/', query.encode(), headers)
     response = urlopen(req)
     result = response.read().decode('utf-8')
     return result
@@ -261,7 +266,7 @@ def arrayfmt(l):
 
 def marshall_param(p):
     "format a parameter"
-    if isinstance(p, str):
+    if isinstance(p, basestring):
         return quote(p)
 
     if isinstance(p, list):

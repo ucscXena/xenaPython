@@ -4,7 +4,7 @@ Python API for Xena Hub
 ---------
 
 #### Requirement
-    support python2
+    support python2 python3
 
 
 #### Installation

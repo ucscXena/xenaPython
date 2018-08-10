@@ -63,9 +63,11 @@ Python API for Xena Hub
 Help on package xenaPython:
 
 NAME
+
     xenaPython - Methods for querying data from UCSC Xena hubs
 
 DESCRIPTION
+
     Data rows are associated with "sample" IDs.
     Sample IDs are unique within a "cohort".
     A "dataset" is a particular assay of a cohort, e.g. gene expression.

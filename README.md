@@ -84,11 +84,13 @@ DESCRIPTION
     set of probes.
 
 PACKAGE CONTENTS
+
     example
     xenaAPI
     xenaQuery
 
 FUNCTIONS
+
     all_cohorts(host)
     
     all_datasets_n(host)

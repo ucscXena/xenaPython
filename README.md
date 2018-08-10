@@ -16,10 +16,7 @@ Python API for Xena Hub
 
 
 #### Usage
-
-    >>import xenaPython as xena
-    >>xena.xenaAPI
-
+    >>> import xenaPython
 
 #### Examples
 
@@ -59,8 +56,151 @@ Python API for Xena Hub
 ##### 6. Find out hub id, dataset id
     use xena browser datasets tool:  https://xenabrowser.net/datapages/
 
+#### Help
+    >>> import xenaPython
+    >>> help(xenaPython)
+    
+Help on package xenaPython:
 
+NAME
+    xenaPython - Methods for querying data from UCSC Xena hubs
 
+DESCRIPTION
+    Data rows are associated with "sample" IDs.
+    Sample IDs are unique within a "cohort".
+    A "dataset" is a particular assay of a cohort, e.g. gene expression.
+    Datasets have associated metadata, specifying their data type and cohort.
+    
+    There are three primary data types: dense matrix (samples by probes),
+    sparse (sample, position, variant), and segmented (sample, position, value).
+    
+    
+    Dense matrices can be genotypic or phenotypic. Phenotypic matrices have
+    associated field metadata (descriptive names, codes, etc.).
+    
+    Genotypic matricies may have an associated probeMap, which maps probes to
+    genomic locations. If a matrix has hugo probeMap, the probes themselves
+    are gene names. Otherwise, a probeMap is used to map a gene location to a
+    set of probes.
+
+PACKAGE CONTENTS
+    example
+    xenaAPI
+    xenaQuery
+
+FUNCTIONS
+    all_cohorts(host)
+    
+    all_datasets_n(host)
+        Count the number datasets with non-null cohort
+    
+    all_field_metadata(host, dataset)
+        Metadata for all dataset fields (phenotypic datasets)
+    
+    cohort_samples(host, cohort, limit)
+        All samples in cohort
+    
+    cohort_summary(host, exclude)
+        Count datasets per-cohort, excluding the given dataset types
+        
+        xena.cohort_summary(xena.PUBLIC_HUBS["pancanAtlasHub"], ["probeMap"])
+    
+    dataset_fetch(host, dataset, samples, probes)
+        Probe values for give samples
+    
+    dataset_field(host, dataset)
+        All field (probe) names in dataset
+    
+    dataset_field_examples(host, dataset, count)
+        Field names in dataset, up to <count>
+    
+    dataset_field_n(host, dataset)
+        Number of fields in dataset
+    
+    dataset_gene_probe_avg(host, dataset, samples, genes)
+        Probe average, per-gene, for given samples
+    
+    dataset_gene_probes_values(host, dataset, samples, genes)
+        Probe values in gene, and probe genomic positions, for given samples
+    
+    dataset_list(host, cohorts)
+        Dataset metadata for datasets in the given cohorts
+    
+    dataset_metadata(host, dataset)
+        Dataset metadata
+
+    dataset_probe_signature(host, dataset, samples, probes, weights)
+        Computed probe signature for given samples and weight array
+    
+    dataset_probe_values(host, dataset, samples, probes)
+        Probe values for given samples, and probe genomic positions
+        
+        host = xena.PUBLIC_HUBS["pancanAtlasHub"]
+        dataset = "EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena"
+        samples = xena.dataset_samples(host, dataset, None)
+        [position, [foxm1, tp53]] = xena.dataset_probe_values(host, dataset, samples, ["FOXM1", "TP53"])
+    
+    dataset_samples(host, dataset, limit)
+        All samples in dataset (optional limit)
+        
+        samples = xena.dataset_samples(xena.PUBLIC_HUBS["pancanAtlasHub"], "EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena", None)
+    
+    dataset_samples_n_dense_matrix(host, dataset)
+        All samples in dataset (faster, for dense matrix dataset only)
+    
+    feature_list(host, dataset)
+        Dataset field names and long titles (phenotypic datasets)
+    
+    field_codes(host, dataset, fields)
+        Codes for categorical fields
+    
+    field_metadata(host, dataset, fields)
+        Metadata for given fields (phenotypic datasets)
+    
+    gene_transcripts(host, dataset, gene)
+        Gene transcripts
+    
+    match_fields(host, dataset, names)
+        Find fields matching names (must be lower-case)
+    
+    ref_gene_exons(host, dataset, genes)
+        Gene model
+    
+    ref_gene_position(host, dataset, gene)
+        Gene position from gene model
+    
+    ref_gene_range(host, dataset, chr, start, end)
+        Gene models overlapping range
+    
+    segment_data_examples(host, dataset, count)
+        Initial segmented data rows, with limit
+    
+    segmented_data_range(host, dataset, samples, chr, start, end)
+        Segmented (copy number) data overlapping range
+    
+    sparse_data(host, dataset, samples, genes)
+        Sparse (mutation) data rows for genes
+    
+    sparse_data_examples(host, dataset, count)
+        Initial sparse data rows, with limit
+    
+    sparse_data_match_field(host, field, dataset, names)
+        Genes in sparse (mutation) dataset matching given names
+    
+    sparse_data_match_field_slow(host, field, dataset, names)
+        Genes in sparse (mutation) dataset matching given names, case-insensitive (names must be lower-case)
+    
+    sparse_data_match_partial_field(host, field, dataset, names, limit)
+        Partial match genes in sparse (mutation) dataset
+
+    sparse_data_match_partial_field(host, field, dataset, names, limit)
+        Partial match genes in sparse (mutation) dataset
+    
+    sparse_data_range(host, dataset, samples, chr, start, end)
+        Sparse (mutation) data rows overlapping the given range, for the given samples
+    
+    transcript_expression(host, transcripts, studyA, subtypeA, studyB, subtypeB, dataset)
+    
 #### Contact
      http://xena.ucsc.edu/
      https://groups.google.com/forum/#!forum/ucsc-cancer-genomics-browser

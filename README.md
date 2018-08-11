@@ -27,8 +27,9 @@ Python API for Xena Hub
     dataset = "tcga_RSEM_gene_tpm"
     samples = ["TCGA-02-0047-01","TCGA-02-0055-01","TCGA-02-2483-01","TCGA-02-2485-01"]
     probes = ['ENSG00000282740.1', 'ENSG00000000005.5', 'ENSG00000000419.12']
-    print xena.xenaAPI.Probes_values (hub, dataset, samples, probes)
-
+    [position, [ENSG00000282740_1, ENSG00000000005_5, ENSG00000000419_12]] = xena.dataset_probe_values(hub, dataset, samples, probes)
+    ENSG00000282740_1
+    
 ##### 2: Query four samples and three genes expression, when the dataset you want to query has a identifier-to-gene mapping
     hub = "https://toil.xenahubs.net"
     dataset = "tcga_RSEM_gene_tpm"

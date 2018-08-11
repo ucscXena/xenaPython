@@ -48,7 +48,8 @@ Python API for Xena Hub
 ##### 4: Find out the samples in a dataset
     hub = "https://tcga.xenahubs.net"
     dataset = "TCGA.BLCA.sampleMap/HiSeqV2"
-    print xena.xenaAPI.dataset_samples (hub, dataset)
+    xena.dataset_samples (hub, dataset, 10)
+    xena.dataset_samples (hub, dataset, None)
 
 ##### 5: Find out the identifiers in a dataset
     hub = "https://tcga.xenahubs.net"

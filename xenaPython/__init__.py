@@ -34,8 +34,9 @@ PUBLIC_HUBS = {
     'pcawgHub': 'https://pcawg.xenahubs.net',
     'singlecellHub': 'https://singlecell.xenahubs.net',
     'pancanAtlasHub': 'https://pancanatlas.xenahubs.net',
-    'treehouseHub': 'https://treehouse.xenahubs.net',
-    'gdcHub': "https://gdc.xenahubs.net"
+    'treehouseHub': 'https://xena.treehouse.gi.ucsc.edu',
+    'gdcHub': "https://gdc.xenahubs.net",
+    'reference': "https://reference.xenahubs.net"
 }
 
 LOCAL_HUB = 'https://local.xena.ucsc.edu:7223'
@@ -79,6 +80,7 @@ samples = xena.dataset_samples(host, dataset, None)
     'field_metadata': 'Metadata for given fields (phenotypic datasets)',
     'gene_transcripts': 'Gene transcripts',
     'match_fields': 'Find fields matching names (must be lower-case)',
+    'probemap_list': 'Find probemaps',
     'ref_gene_exons': 'Gene model',
     'ref_gene_position': 'Gene position from gene model',
     'ref_gene_range': 'Gene models overlapping range',

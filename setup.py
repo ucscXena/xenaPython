@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 print(find_packages())
 setup(
     name="xenaPython",
-    version="1.0.7",
+    version="1.0.8",
     packages=find_packages(),
     include_package_data=True,
     author = '@jingchunzhu, @acthp',

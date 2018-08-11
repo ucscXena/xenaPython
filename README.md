@@ -30,12 +30,12 @@ Python API for Xena Hub
     [position, [ENSG00000282740_1, ENSG00000000005_5, ENSG00000000419_12]] = xena.dataset_probe_values(hub, dataset, samples, probes)
     ENSG00000282740_1
     
-##### 2: Query four samples and three genes expression, when the dataset you want to query has a identifier-to-gene mapping
+##### 2: Query four samples and three genes expression, when the dataset you want to query has a identifier-to-gene mapping (i.e. xena probeMap)
     hub = "https://toil.xenahubs.net"
     dataset = "tcga_RSEM_gene_tpm"
     samples = ["TCGA-02-0047-01","TCGA-02-0055-01","TCGA-02-2483-01","TCGA-02-2485-01"]
     genes =["TP53", "RB1", "PIK3CA"]
-    print xena.xenaAPI.Genes_values (hub, dataset, samples, genes)
+    xena.dataset_gene_probe_avg(hub, dataset, samples, genes)
 
 ##### 3: If the dataset does not have id-to-gene mapping, but the dataset used gene names as its identifier, you can query gene expression like example 1, example 2 will not work.
     hub = "https://toil.xenahubs.net"

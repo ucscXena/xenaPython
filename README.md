@@ -42,7 +42,8 @@ Python API for Xena Hub
     dataset = "tcga_RSEM_Hugo_norm_count"
     samples = ["TCGA-02-0047-01","TCGA-02-0055-01","TCGA-02-2483-01","TCGA-02-2485-01"]
     probes =["TP53", "RB1", "PIK3CA"]
-    print xena.xenaAPI.Probes_values (hub, dataset, samples, probes)
+    [position, [TP53, RB1, PIK3CA]] = xena.dataset_probe_values (hub, dataset, samples, probes)
+    TP53
 
 ##### 4: Find out the samples in a dataset
     hub = "https://tcga.xenahubs.net"

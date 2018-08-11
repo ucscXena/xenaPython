@@ -204,6 +204,11 @@ FUNCTIONS
         Sparse (mutation) data rows overlapping the given range, for the given samples
     
     transcript_expression(host, transcripts, studyA, subtypeA, studyB, subtypeB, dataset)
+
+DATA
+
+    LOCAL_HUB = 'https://local.xena.ucsc.edu:7223'
+    PUBLIC_HUBS = {'gdcHub': 'https://gdc.xenahubs.net', 'icgcHub': 'https...
     
 #### Contact
      http://xena.ucsc.edu/

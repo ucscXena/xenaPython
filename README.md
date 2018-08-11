@@ -54,9 +54,14 @@ Python API for Xena Hub
 ##### 5: Find out the identifiers in a dataset
     hub = "https://tcga.xenahubs.net"
     dataset = "TCGA.BLCA.sampleMap/HiSeqV2"
-    print xena.xenaAPI.dataset_fields (hub, dataset)
+    xena.dataset_field (hub, dataset)
 
-##### 6. Find out hub id, dataset id
+##### 6. Find out the number of idnetifiers in a dataset
+    hub = "https://tcga.xenahubs.net"
+    dataset = "TCGA.BLCA.sampleMap/HiSeqV2"
+    xena.dataset_field_n (hub, dataset)
+    
+##### 7. Find out hub id, dataset id
     use xena browser datasets tool:  https://xenabrowser.net/datapages/
 
 #### Help

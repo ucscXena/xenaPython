@@ -16,7 +16,7 @@ Python API for Xena Hub
 
 
 #### Usage
-    >>> import xenaPython
+    >>> import xenaPython as Xena
 
 #### Examples
 

@@ -93,12 +93,6 @@ DESCRIPTION
     are gene names. Otherwise, a probeMap is used to map a gene location to a
     set of probes.
 
-PACKAGE CONTENTS
-
-    example
-    xenaAPI
-    xenaQuery
-
 FUNCTIONS
 
     all_cohorts(host)

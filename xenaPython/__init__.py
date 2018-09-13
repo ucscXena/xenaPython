@@ -41,6 +41,8 @@ PUBLIC_HUBS = {
 
 LOCAL_HUB = 'https://local.xena.ucsc.edu:7223'
 
+excludeType = ["probeMap", "probemap", "genePredExt"]
+
 #
 # Dynamically build methods from queries/*.xq
 #

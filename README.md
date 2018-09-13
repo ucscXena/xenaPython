@@ -94,7 +94,6 @@ DESCRIPTION
     set of probes.
 
 FUNCTIONS
-
     all_cohorts(host)
     
     all_datasets_n(host)
@@ -125,7 +124,7 @@ FUNCTIONS
     
     dataset_gene_probe_avg(host, dataset, samples, genes)
         Probe average, per-gene, for given samples
-    
+        
     dataset_gene_probes_values(host, dataset, samples, genes)
         Probe values in gene, and probe genomic positions, for given samples
     
@@ -134,7 +133,7 @@ FUNCTIONS
     
     dataset_metadata(host, dataset)
         Dataset metadata
-
+    
     dataset_probe_signature(host, dataset, samples, probes, weights)
         Computed probe signature for given samples and weight array
     
@@ -150,7 +149,7 @@ FUNCTIONS
         All samples in dataset (optional limit)
         
         samples = xena.dataset_samples(xena.PUBLIC_HUBS["pancanAtlasHub"], "EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena", None)
-    
+        
     dataset_samples_n_dense_matrix(host, dataset)
         All samples in dataset (faster, for dense matrix dataset only)
     
@@ -168,6 +167,9 @@ FUNCTIONS
     
     match_fields(host, dataset, names)
         Find fields matching names (must be lower-case)
+    
+    probemap_list(host)
+        Find probemaps
     
     ref_gene_exons(host, dataset, genes)
         Gene model
@@ -198,15 +200,12 @@ FUNCTIONS
     
     sparse_data_match_partial_field(host, field, dataset, names, limit)
         Partial match genes in sparse (mutation) dataset
-
-    sparse_data_match_partial_field(host, field, dataset, names, limit)
-        Partial match genes in sparse (mutation) dataset
     
     sparse_data_range(host, dataset, samples, chr, start, end)
         Sparse (mutation) data rows overlapping the given range, for the given samples
     
     transcript_expression(host, transcripts, studyA, subtypeA, studyB, subtypeB, dataset)
-
+    
 DATA
 
     LOCAL_HUB = 'https://local.xena.ucsc.edu:7223'

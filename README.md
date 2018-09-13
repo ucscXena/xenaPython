@@ -94,7 +94,10 @@ DESCRIPTION
     set of probes.
 
 FUNCTIONS
-    all_cohorts(host)
+
+    all_cohorts(host, exclude)
+    
+    all_datasets(host)
     
     all_datasets_n(host)
         Count the number datasets with non-null cohort
@@ -124,7 +127,7 @@ FUNCTIONS
     
     dataset_gene_probe_avg(host, dataset, samples, genes)
         Probe average, per-gene, for given samples
-        
+    
     dataset_gene_probes_values(host, dataset, samples, genes)
         Probe values in gene, and probe genomic positions, for given samples
     
@@ -149,9 +152,11 @@ FUNCTIONS
         All samples in dataset (optional limit)
         
         samples = xena.dataset_samples(xena.PUBLIC_HUBS["pancanAtlasHub"], "EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena", None)
-        
+    
     dataset_samples_n_dense_matrix(host, dataset)
         All samples in dataset (faster, for dense matrix dataset only)
+
+    datasets_null_rows(host)
     
     feature_list(host, dataset)
         Dataset field names and long titles (phenotypic datasets)
@@ -167,6 +172,8 @@ FUNCTIONS
     
     match_fields(host, dataset, names)
         Find fields matching names (must be lower-case)
+    
+    probe_count(host, dataset)
     
     probemap_list(host)
         Find probemaps
@@ -205,11 +212,13 @@ FUNCTIONS
         Sparse (mutation) data rows overlapping the given range, for the given samples
     
     transcript_expression(host, transcripts, studyA, subtypeA, studyB, subtypeB, dataset)
+
     
 DATA
 
     LOCAL_HUB = 'https://local.xena.ucsc.edu:7223'
     PUBLIC_HUBS = {'gdcHub': 'https://gdc.xenahubs.net', 'icgcHub': 'https...
+    excludeType = ['probeMap', 'probemap', 'genePredExt']
     
 #### Contact
      http://xena.ucsc.edu/

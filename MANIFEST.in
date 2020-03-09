@@ -1,1 +1,2 @@
 include xenaPython/queries/*.xq
+include xenaPython/jupyter.js

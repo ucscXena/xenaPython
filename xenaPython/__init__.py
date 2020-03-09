@@ -120,3 +120,27 @@ def _create_methods():
         setattr(_MODULE, name, call)
 
 _create_methods()
+
+# notebook support
+def load_ipython_extension(ipython):
+    "jupyter support method"
+    import os
+    try:
+        host = os.environ["XENA_BROWSER"]
+    except KeyError:
+        host = 'https://xenabrowser.net'
+    print("host " + host)
+    dir = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(dir, "jupyter.py"), "r") as f:
+        init_py_comm = f.read()
+    with open(os.path.join(dir, "jupyter.js"), "r") as f:
+        init_js_comm = f.read()
+    ipython.run_cell('%%javascript\nwindow.xenabrowser = {url: "' + host + '"};')
+    ipython.run_cell('%%javascript\n' + init_js_comm)
+    ipython.run_cell('import ' + globals()['__name__'])
+    ipython.run_cell(init_py_comm, False, True, False)
+    print("loading")
+
+def unload_ipython_extension(ipython):
+    "jupyter support method"
+    print("unloading")

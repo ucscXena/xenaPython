@@ -129,7 +129,6 @@ def load_ipython_extension(ipython):
         host = os.environ["XENA_BROWSER"]
     except KeyError:
         host = 'https://xenabrowser.net'
-    print("host " + host)
     dir = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(dir, "jupyter.py"), "r") as f:
         init_py_comm = f.read()
@@ -139,6 +138,7 @@ def load_ipython_extension(ipython):
     ipython.run_cell('%%javascript\n' + init_js_comm)
     ipython.run_cell('import ' + globals()['__name__'])
     ipython.run_cell(init_py_comm, False, True, False)
+    os.system(os.path.join(dir, 'startxena.sh'))
     print("loading")
 
 def unload_ipython_extension(ipython):

@@ -12,7 +12,7 @@ VERSION=25
 FILE=ucsc_xena_0_${VERSION}_0.tar.gz
 JAR=cavm-0.${VERSION}.0-standalone.jar
 
-size=$(curl -I ${HOST}/${FILE} | grep 'Content-Length' | sed -e 's/[^0-9]*\([0-9]\+\)[^0-9]*/\1/')
+size=$(curl -I ${HOST}/${FILE} | grep -i 'Content-Length' | sed -e 's/[^0-9]*\([0-9]\+\)[^0-9]*/\1/')
 localsize=$(stat --format="%s" ${FILE} || echo 0)
 
 if [ "${size}" -ne "${localsize}" ]; then

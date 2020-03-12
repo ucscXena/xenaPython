@@ -121,6 +121,40 @@ def _create_methods():
 
 _create_methods()
 
+def _filehash(file):
+    import hashlib
+    sha_hash = hashlib.sha1()
+    with open(file,"rb") as f:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha_hash.update(byte_block)
+    return sha_hash.hexdigest()
+
+def _name_to_path(name):
+    import os
+    home = os.environ['HOME']
+    return os.path.join(home, 'xena', 'files', name)
+
+def _file_loaded(host, name):
+    status = dataset_status(host, name)
+    try:
+        return status[0]['status'] == 'loaded'
+    except:
+        return False
+
+def _hashes_match(host, name):
+    hashes = dataset_sources(host, name)
+    return all(_filehash(_name_to_path(file['name'])) == file['hash'] for file in hashes)
+
+# XXX need timeout and error handling
+# should this do the file copy, too?
+def load_file(host, name):
+    import requests
+    import time
+    requests.post(host + '/update/', data = {'file': _name_to_path(name)})
+    while not _file_loaded(host, name) or not _hashes_match(host, name):
+        time.sleep(20)
+
 # notebook support
 def load_ipython_extension(ipython):
     "jupyter support method"

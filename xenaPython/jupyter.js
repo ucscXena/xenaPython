@@ -17,4 +17,6 @@ Jupyter.notebook.kernel.comm_manager.register_target('xena_comm',
     });
 // note that sessionStorage for the domain is inherited from the notebook tab, which
 // makes the state of the xena client a bit sticky.
-window.xenabrowser.window = window.open(window.xenabrowser.url + '/')
+// Moving this to the python method open_browser(). Not sure how we
+// want to manage windows, in general.
+//window.xenabrowser.window = window.open(window.xenabrowser.url + '/')

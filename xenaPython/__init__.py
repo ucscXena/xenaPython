@@ -155,9 +155,23 @@ def load_file(host, name):
     while not _file_loaded(host, name) or not _hashes_match(host, name):
         time.sleep(20)
 
+ipython_instance = None
+
+def open_browser(url = 'heatmap/', columns = []):
+    import json, urllib
+    if len(columns) > 0:
+        withhost = [{'name': c['name'], 'fields': c['fields'], 'host': 'notebook:'}
+                for c in columns]
+        cols = '?columns=' + urllib.parse.quote(json.dumps(withhost), safe='~()*!.\'')
+    else:
+        cols = ''
+    ipython_instance.run_cell("%%%%javascript\nwindow.xenabrowser.window = window.open(window.xenabrowser.url + '/%s%s')" % (url, cols))
+
 # notebook support
 def load_ipython_extension(ipython):
     "jupyter support method"
+    global ipython_instance
+    ipython_instance = ipython
     import os
     try:
         host = os.environ["XENA_BROWSER"]

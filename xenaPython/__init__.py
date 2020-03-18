@@ -165,7 +165,7 @@ def open_browser(url = 'heatmap/', columns = []):
         cols = '?columns=' + urllib.parse.quote(json.dumps(withhost), safe='~()*!.\'')
     else:
         cols = ''
-    ipython_instance.run_cell("%%%%javascript\nwindow.xenabrowser.window = window.open(window.xenabrowser.url + '/%s%s')" % (url, cols))
+    ipython_instance.run_cell("%%%%javascript\nwindow.open(window.xenabrowser.url + '/%s%s')" % (url, cols))
 
 # notebook support
 def load_ipython_extension(ipython):

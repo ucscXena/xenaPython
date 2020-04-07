@@ -3,4 +3,4 @@ sudo pip install wheel
 # edit setup.py with new version number:
 python setup.py sdist bdist_wheel 
 python2.7 setup.py sdist bdist_wheel 
-twine upload dist/ xenaPython-1.0.xx*
+twine upload dist/xenaPython-1.0.xx*

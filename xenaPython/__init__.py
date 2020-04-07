@@ -148,7 +148,7 @@ def _hashes_match(host, name):
 
 # XXX need timeout and error handling
 # should this do the file copy, too?
-def load_file(host, name):
+def load_file(name, host = "http://127.0.0.1:7222"):
     import requests
     import time
     requests.post(host + '/update/', data = {'file': _name_to_path(name)})

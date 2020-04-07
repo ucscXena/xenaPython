@@ -13,7 +13,7 @@ def buildsjson_scRNA_geneExp(output, cohort, label = None):
         J['label'] = label
     else:
         J['label'] = os.path.basename(output)
-    J["colNormalization"] = "log2(x)"
+    J["colNormalization"] = True
     J['cohort'] = cohort
     J['version'] = datetime.date.today().isoformat()
     json.dump(J, fout, indent = 4)

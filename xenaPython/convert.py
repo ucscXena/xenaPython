@@ -39,7 +39,7 @@ def adataToXena(adata, path, studyName):
     """
 
     if not isdir(path):
-        os.mkdir(path)
+        os.makedirs(path)
 
     # build expression data file
     expfile = 'exprMatrix.tsv'

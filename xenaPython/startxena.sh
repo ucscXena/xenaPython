@@ -11,6 +11,7 @@ HOST=https://genome-cancer.ucsc.edu/download/public/get-xena
 VERSION=25
 FILE=ucsc_xena_0_${VERSION}_0.tar.gz
 JAR=cavm-0.${VERSION}.0-standalone.jar
+XENA_HOME=${HOME}
 
 size=$(curl -I ${HOST}/${FILE} | grep -i 'Content-Length' | sed -e 's/[^0-9]*\([0-9]\+\)[^0-9]*/\1/')
 localsize=$(stat --format="%s" ${FILE} || echo 0)
@@ -24,4 +25,18 @@ fi
 echo "starting"
 # note that we will exit if the port is already bound, or
 # if the database is locked (though that takes about a minute to check).
-java -jar ucsc_xena/${JAR} --localdev --no-gui &
+
+# xena home dir
+while getopts r: opt; do
+	case $opt in
+		r) XENA_HOME=$OPTARG
+			;;
+	esac
+done
+
+if [ ${XENA_HOME} == ${HOME} ]; then
+	java -jar ucsc_xena/${JAR} --localdev --no-gui &
+else
+	ROOTDIR=${XENA_HOME}/xena
+	java -jar ucsc_xena/${JAR} --localdev --no-gui -d ${ROOTDIR}/database -r ${ROOTDIR}/files --logfile ${ROOTDIR}/xena.log &
+fi

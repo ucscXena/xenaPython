@@ -132,7 +132,10 @@ def _filehash(file):
 
 def _name_to_path(name):
     import os
-    home = os.environ['HOME']
+    try:
+        home = os.environ["XENA_HOME"]
+    except KeyError:
+        home = os.environ['HOME']
     return os.path.join(home, 'xena', 'files', name)
 
 def _file_loaded(host, name):
@@ -186,7 +189,13 @@ def load_ipython_extension(ipython):
     ipython.run_cell('%%javascript\n' + init_js_comm)
     ipython.run_cell('import ' + globals()['__name__'])
     ipython.run_cell(init_py_comm, False, True, False)
-    os.system(os.path.join(dir, 'startxena.sh'))
+
+    # xena rootdir default to $HOME/xena, but can be set by setting environmental variable $ROOTDIR
+    try:
+        home = os.environ["XENA_HOME"]
+        os.system(os.path.join(dir, 'startxena.sh') + ' -r ' + home)
+    except KeyError:
+        os.system(os.path.join(dir, 'startxena.sh'))
     print("loading")
 
 def unload_ipython_extension(ipython):

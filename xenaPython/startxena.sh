@@ -7,7 +7,7 @@ set -o nounset
 # name.
 # Needs better error handling.
 
-HOST=https://github.com/ucscXena/tmpdownload/raw/master
+HOST=https://raw.githubusercontent.com/ucscXena/tmpdownload/master
 # HOST=https://genome-cancer.ucsc.edu/download/public/get-xena
 VERSION=25
 FILE=ucsc_xena_0_${VERSION}_0.tar.gz

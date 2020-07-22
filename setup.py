@@ -12,6 +12,6 @@ setup(
     keywords = ['xena', 'ucsc', 'xenaAPI', 'xenaPython'],
     license='Apache 2.0',
     extras_require={
-        "convert": ["scanpy", "loom", "cellbrowser"],
+        "convert": ["scanpy", "loompy"],
     }
 )

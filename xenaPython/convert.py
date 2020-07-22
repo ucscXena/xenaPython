@@ -102,6 +102,18 @@ def adataToXena(adata, path, studyName):
     # build meta data .json file
     buildsjson_phenotype(metaName, studyName)
 
+    # spatial coordinate
+    if adata.obsm and 'X_spatial' in adata.obsm:
+        import numpy, pandas
+        data = pandas.DataFrame(adata.obsm["X_spatial"], columns=['X', 'Y'])
+        data = data.set_index(adata.obs.index)
+        spatial_coord_file = 'spatial.tsv'
+        label = "spatial XY coordinate"
+
+        data.to_csv(join(path, spatial_coord_file), sep='\t')
+        buildsjson_phenotype(join(path, spatial_coord_file), studyName, label)
+
+
     
 def loomToXena(matrixFname, path, studyName):
     """
@@ -125,11 +137,3 @@ def visiumToXena(visiumDataDir, count_file, path, studyName):
     adata = sc.read_visium(visiumDataDir, count_file=count_file)
     adataToXena(adata, path, studyName)
 
-    import numpy, pandas
-    data = pandas.DataFrame(adata.obsm["X_spatial"], columns=['X', 'Y'])
-    data = data.set_index(adata.obs.index)
-    spatial_coord_file = 'spatial.tsv'
-    label = "spatial XY coordinate"
-
-    data.to_csv(join(path, spatial_coord_file), sep='\t')
-    buildsjson_phenotype(join(path, spatial_coord_file), studyName, label)

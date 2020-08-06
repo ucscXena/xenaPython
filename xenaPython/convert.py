@@ -83,7 +83,7 @@ def anndataMatrixToTsv(adata, matFname, transpose = True):
 
 def adataToXena(adata, path, studyName, transpose = True):
     """
-    Given a scanpy anndata (adata) object, write dataset to a dataset directory under path.
+    Given an anndata (adata) object, write dataset to a dataset directory under path.
     """
 
     if not isdir(path):
@@ -124,6 +124,47 @@ def adataToXena(adata, path, studyName, transpose = True):
         data.to_csv(join(path, spatial_coord_file), sep='\t')
         buildsjson_phenotype(join(path, spatial_coord_file), studyName, label)
 
+def starfishExpressionMatrixToXena(mat, path, studyName):
+    """
+    Given a starfish ExpressionMatrix object (mat), write dataset to a dataset directory under path.
+    """
+
+    # build expression data file
+    expfile = 'exprMatrix.tsv'
+    matName = join(path, expfile)
+
+    if isfile(matName):
+        overwrite  = input("%s already exists. Overwriting existing files? Yes or No: " % matName)
+        if overwrite.upper() == "YES":
+            mat.to_pandas().transpose().to_csv(matName, sep='\t')
+    else:
+        mat.to_pandas().transpose().to_csv(matName, sep='\t')
+
+    # build expression data .json file
+    buildsjson_scRNA_geneExp(matName, studyName)
+
+    # build meta data (phenotype data) file
+    metafile = 'meta.tsv'
+    metaName = join(path, metafile)
+
+    cells = mat.cells.data.tolist()
+    features = mat.cells.coords
+
+    ofh = open(metaName, "w")
+    ofh.write("\t")
+    ofh.write("\t".join(features))
+    ofh.write("\n")
+    for i, cell in enumerate(cells):
+        ofh.write(str(cell))
+        for k in features:
+            ofh.write("\t" + str(features[k].values[i]))
+        ofh.write("\n")
+    ofh.close()
+
+    # build meta data .json file
+    buildsjson_phenotype(metaName, studyName)
+
+
 def scanpyLoomToXena(matrixFname, path, studyName, transpose = True):
     """
     Given a scanpy loom file, write dataset to a dataset directory under path.
@@ -159,4 +200,5 @@ def visiumToXena(visiumDataDir, count_file, path, studyName):
     # https://scanpy.readthedocs.io/en/stable/api/scanpy.read_visium.html
     adata = sc.read_visium(visiumDataDir, count_file=count_file)
     adataToXena(adata, path, studyName)
+
 

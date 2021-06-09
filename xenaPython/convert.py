@@ -3,6 +3,9 @@ import os, sys
 import datetime, json
 import scanpy as sc
 
+def dim_name(mapName, dim):
+    return mapName + '_' + str(dim+1)
+
 def buildsjson_scRNA_geneExp(output, cohort, label = None):
     fout = open(output +'.json', 'w')
     J = {}
@@ -31,6 +34,30 @@ def buildsjson_phenotype(output, cohort, label = None):
     J['version'] = datetime.date.today().isoformat()
     json.dump(J, fout, indent = 4)
     fout.close()
+
+def buildsjson_map (output, map_meta, cohort, label = None):
+    fout = open(output +'.json', 'w')
+    J = {}
+    J['type'] ='clinicalMatrix'
+    J['dataSubtype'] = 'maps'
+    if label:
+        J['label'] = label
+    else:
+        J['label'] = os.path.basename(output)
+    J['cohort'] = cohort
+    J['version'] = datetime.date.today().isoformat()
+
+    J['map'] =[]
+    for map_info in map_meta:
+        J['map'].append({
+            'label': map_info['label'],
+            'dataSubType':  map_info['dataSubType'],
+            'dimension': map_info['dimension']
+            })
+
+    json.dump(J, fout, indent = 4)
+    fout.close()
+
 
 def anndataMatrixToTsv(adata, matFname, transpose = True):
     """
@@ -81,6 +108,7 @@ def anndataMatrixToTsv(adata, matFname, transpose = True):
 
     ofh.close()
 
+
 def adataToXena(adata, path, studyName, transpose = True):
     """
     Given an anndata (adata) object, write dataset to a dataset directory under path.
@@ -113,16 +141,49 @@ def adataToXena(adata, path, studyName, transpose = True):
     # build meta data .json file
     buildsjson_phenotype(metaName, studyName)
 
-    # spatial coordinate
-    if adata.obsm and 'X_spatial' in adata.obsm:
-        import numpy, pandas
-        data = pandas.DataFrame(adata.obsm["X_spatial"], columns=['X', 'Y'])
-        data = data.set_index(adata.obs.index)
-        spatial_coord_file = 'spatial.tsv'
-        label = "spatial XY coordinate"
+    # pca, tsne, umap, spatial coordinates
+    if adata.obsm is not None:
+        import numpy, pandas as pd
 
-        data.to_csv(join(path, spatial_coord_file), sep='\t')
-        buildsjson_phenotype(join(path, spatial_coord_file), studyName, label)
+        dfs = []
+        dfs_meta =[]
+        for map in adata.obsm.keys():
+            cols =[]
+            if map == 'X_pca':
+                mapName = "pca"
+                dataSubType = 'embedding'
+            elif map == 'X_umap':
+                mapName = "umap"
+                dataSubType = 'embedding'
+            elif map == 'X_tsne':
+                mapName = "tsne"
+                dataSubType = 'embedding'
+            elif map == 'X_spatial':
+                mapName = 'spatial'
+                dataSubType = 'spatial'
+
+            row,col = adata.obsm[map].shape
+            col = min(col, 3)
+
+            for i in range (0, col):
+                colName = dim_name(mapName, i)
+                cols.append(colName)
+
+            df = pd.DataFrame(adata.obsm[map][:,range(col)], columns=cols)
+            df = df.set_index(adata.obs.index)
+            dfs.append(df)
+            dfs_meta.append({
+                'label': mapName,
+                'dataSubType': dataSubType,
+                'dimension':cols
+                })
+        result = pd.concat(dfs, axis=1)
+
+        map_file = 'maps.tsv'
+        label = "maps"
+
+        result.to_csv(join(path, map_file), sep='\t')
+        buildsjson_map(join(path, map_file), dfs_meta, studyName, label)
 
 def starfishExpressionMatrixToXena(mat, path, studyName):
     """
@@ -165,40 +226,48 @@ def starfishExpressionMatrixToXena(mat, path, studyName):
     buildsjson_phenotype(metaName, studyName)
 
 
-def scanpyLoomToXena(matrixFname, path, studyName, transpose = True):
+def scanpyLoomToXena(matrixFname, outputpath, studyName, transpose = True):
     """
     Given a scanpy loom file, write dataset to a dataset directory under path.
     Transposing matrix needed, as scanpy has the samples on the rows
     """
-    loomToXena(matrixFname, path, studyName, transpose)
+    loomToXena(matrixFname, outputpath, studyName, transpose)
 
-def starfishLoomToXena(matrixFname, path, studyName, transpose = False):
+def starfishLoomToXena(matrixFname, outputpath, studyName, transpose = False):
     """
     Given a starfish loom file, write dataset to a dataset directory under path.
     Transposing matrix not needed, as starfish has the cells on the rows
     """
-    loomToXena(matrixFname, path, studyName, transpose)
+    loomToXena(matrixFname, outputpath, studyName, transpose)
 
-def loomToXena(matrixFname, path, studyName, transpose = True):
+def loomToXena(matrixFname, outputpath, studyName, transpose = True):
     """
     Given a loom file, write dataset to a dataset directory under path.
     """
     adata = sc.read(matrixFname, first_column_names=True)
-    adataToXena(adata, path, studyName, transpose)
+    adataToXena(adata, outputpath, studyName, transpose)
 
-def h5adToXena(matrixFname, path, studyName):
+def h5adToXena(h5adFname, outputpath, studyName):
     """
     Given a h5ad file, write dataset to a dataset directory under path.
     """
-    adata = sc.read(matrixFname, first_column_names=True)
-    adataToXena(adata, path, studyName)
+    adata = sc.read(h5adFname, first_column_names=True)
+    adataToXena(adata, outputpath, studyName)
 
-def visiumToXena(visiumDataDir, count_file, path, studyName):
+def visiumToXena(visiumDataDir, outputpath, studyName):
     """
-    Given a visium spacerane output data directory, write dataset to a dataset directory under path.
+    Given a visium spaceranger output data directory, write dataset to a dataset directory under path.
     """
     # https://scanpy.readthedocs.io/en/stable/api/scanpy.read_visium.html
-    adata = sc.read_visium(visiumDataDir, count_file=count_file)
-    adataToXena(adata, path, studyName)
+
+    for file in os.listdir(visiumDataDir):
+        if file.endswith("filtered_feature_bc_matrix.h5"):
+            count_file = file
+            print (count_file)
+
+    adata = sc.read_visium(visiumDataDir, count_file = count_file)
+    sc.pp.normalize_total(adata, inplace=True)
+    sc.pp.log1p(adata)
+    adataToXena(adata, outputpath, studyName)
 
 

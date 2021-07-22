@@ -161,6 +161,12 @@ def adataToXena(adata, path, studyName, transpose = True):
             elif map == 'X_spatial':
                 mapName = 'spatial'
                 dataSubType = 'spatial'
+            elif map == 'spatial': # visium
+                mapName = 'spatial'
+                dataSubType = 'spatial'
+            else:
+                print("unrecognized map:", map)
+                continue
 
             row,col = adata.obsm[map].shape
             col = min(col, 3)
@@ -177,13 +183,14 @@ def adataToXena(adata, path, studyName, transpose = True):
                 'dataSubType': dataSubType,
                 'dimension':cols
                 })
-        result = pd.concat(dfs, axis=1)
+        if len(dfs) > 0:
+            result = pd.concat(dfs, axis=1)
 
-        map_file = 'maps.tsv'
-        label = "maps"
+            map_file = 'maps.tsv'
+            label = "maps"
 
-        result.to_csv(join(path, map_file), sep='\t')
-        buildsjson_map(join(path, map_file), dfs_meta, studyName, label)
+            result.to_csv(join(path, map_file), sep='\t')
+            buildsjson_map(join(path, map_file), dfs_meta, studyName, label)
 
 def starfishExpressionMatrixToXena(mat, path, studyName):
     """

@@ -47,14 +47,15 @@ def buildsjson_map (output, map_meta, cohort, label = None):
     J['cohort'] = cohort
     J['version'] = datetime.date.today().isoformat()
 
-    J['map'] =[]
+    J['map'] = map_meta
+    '''
     for map_info in map_meta:
         J['map'].append({
             'label': map_info['label'],
             'dataSubType':  map_info['dataSubType'],
             'dimension': map_info['dimension']
             })
-
+    '''
     json.dump(J, fout, indent = 4)
     fout.close()
 
@@ -176,18 +177,28 @@ def adataToXena(adata, path, studyName, transpose = True):
                 cols.append(colName)
 
             df = pd.DataFrame(adata.obsm[map][:,range(col)], columns=cols)
+
+            maxValue = df.max().max()
+            scaler = 1
+            if maxValue > 1000:             # data need to be in the range o 1 to 1000 for xena browser
+                digit = len(str(int(maxValue / 1000)))
+                scaler = 10 ** digit
+                df = df / scaler
+
             df = df.set_index(adata.obs.index)
             dfs.append(df)
             dfs_meta.append({
                 'label': mapName,
                 'dataSubType': dataSubType,
-                'dimension':cols
+                'dimension':cols,
+                'scaleFactor': scaler
                 })
+
         if len(dfs) > 0:
             result = pd.concat(dfs, axis=1)
 
-            map_file = 'maps.tsv'
-            label = "maps"
+            map_file = 'map.tsv'
+            label = "map"
 
             result.to_csv(join(path, map_file), sep='\t')
             buildsjson_map(join(path, map_file), dfs_meta, studyName, label)

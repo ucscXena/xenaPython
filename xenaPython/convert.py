@@ -178,20 +178,13 @@ def adataToXena(adata, path, studyName, transpose = True):
 
             df = pd.DataFrame(adata.obsm[map][:,range(col)], columns=cols)
 
-            maxValue = df.max().max()
-            scaler = 1
-            if maxValue > 1000:             # data need to be in the range o 1 to 1000 for xena browser
-                digit = len(str(int(maxValue / 1000)))
-                scaler = 10 ** digit
-                df = df / scaler
 
             df = df.set_index(adata.obs.index)
             dfs.append(df)
             dfs_meta.append({
                 'label': mapName,
                 'dataSubType': dataSubType,
-                'dimension':cols,
-                'scaleFactor': scaler
+                'dimension':cols
                 })
 
         if len(dfs) > 0:

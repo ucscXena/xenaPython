@@ -6,7 +6,7 @@ import scanpy as sc
 def dim_name(mapName, dim):
     return mapName + '_' + str(dim+1)
 
-def buildsjson_scRNA_geneExp(output, cohort, label = None):
+def buildsjson_scRNA_geneExp(output, cohort, label = None, unit = None):
     fout = open(output +'.json', 'w')
     J = {}
     J['type'] ='genomicMatrix'
@@ -15,6 +15,8 @@ def buildsjson_scRNA_geneExp(output, cohort, label = None):
         J['label'] = label
     else:
         J['label'] = os.path.basename(output)
+    if unit:
+        J["unit"] = unit
     J["colNormalization"] = True
     J['cohort'] = cohort
     J['version'] = datetime.date.today().isoformat()
@@ -110,7 +112,7 @@ def anndataMatrixToTsv(adata, matFname, transpose = True):
     ofh.close()
 
 
-def adataToXena(adata, path, studyName, transpose = True):
+def adataToXena(adata, path, studyName, transpose = True, unit = None):
     """
     Given an anndata (adata) object, write dataset to a dataset directory under path.
     """
@@ -129,7 +131,7 @@ def adataToXena(adata, path, studyName, transpose = True):
         anndataMatrixToTsv(adata, matName, transpose)
     
     # build expression data .json file
-    buildsjson_scRNA_geneExp(matName, studyName)
+    buildsjson_scRNA_geneExp(matName, studyName, unit = unit)
 
     # build meta data (phenotype data) file
     metafile = 'meta.tsv'
@@ -242,21 +244,21 @@ def scanpyLoomToXena(matrixFname, outputpath, studyName, transpose = True):
     Given a scanpy loom file, write dataset to a dataset directory under path.
     Transposing matrix needed, as scanpy has the samples on the rows
     """
-    loomToXena(matrixFname, outputpath, studyName, transpose)
+    loomToXena(matrixFname, outputpath, studyName, transpose = transpose)
 
 def starfishLoomToXena(matrixFname, outputpath, studyName, transpose = False):
     """
     Given a starfish loom file, write dataset to a dataset directory under path.
     Transposing matrix not needed, as starfish has the cells on the rows
     """
-    loomToXena(matrixFname, outputpath, studyName, transpose)
+    loomToXena(matrixFname, outputpath, studyName, transpose = transpose)
 
 def loomToXena(matrixFname, outputpath, studyName, transpose = True):
     """
     Given a loom file, write dataset to a dataset directory under path.
     """
     adata = sc.read(matrixFname, first_column_names=True)
-    adataToXena(adata, outputpath, studyName, transpose)
+    adataToXena(adata, outputpath, studyName, transpose = transpose)
 
 def h5adToXena(h5adFname, outputpath, studyName):
     """
@@ -279,6 +281,7 @@ def visiumToXena(visiumDataDir, outputpath, studyName):
     adata = sc.read_visium(visiumDataDir, count_file = count_file)
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
-    adataToXena(adata, outputpath, studyName)
+    unit = "log(count+1)"
+    adataToXena(adata, outputpath, studyName, unit = unit)
 
 

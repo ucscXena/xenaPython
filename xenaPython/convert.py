@@ -6,7 +6,7 @@ import scanpy as sc
 def dim_name(mapName, dim):
     return mapName + '_' + str(dim+1)
 
-def buildsjson_scRNA_geneExp(output, cohort, label = None, unit = None):
+def buildsjson_scRNA_geneExp(output, cohort, label = None, metaPara = None):
     fout = open(output +'.json', 'w')
     J = {}
     J['type'] ='genomicMatrix'
@@ -15,8 +15,8 @@ def buildsjson_scRNA_geneExp(output, cohort, label = None, unit = None):
         J['label'] = label
     else:
         J['label'] = os.path.basename(output)
-    if unit:
-        J["unit"] = unit
+    if metaPara:
+        J.update(metaPara)
     J["colNormalization"] = True
     J['cohort'] = cohort
     J['version'] = datetime.date.today().isoformat()
@@ -112,7 +112,7 @@ def anndataMatrixToTsv(adata, matFname, transpose = True):
     ofh.close()
 
 
-def adataToXena(adata, path, studyName, transpose = True, unit = None):
+def adataToXena(adata, path, studyName, transpose = True, metaPara = None):
     """
     Given an anndata (adata) object, write dataset to a dataset directory under path.
     """
@@ -131,7 +131,7 @@ def adataToXena(adata, path, studyName, transpose = True, unit = None):
         anndataMatrixToTsv(adata, matName, transpose)
     
     # build expression data .json file
-    buildsjson_scRNA_geneExp(matName, studyName, unit = unit)
+    buildsjson_scRNA_geneExp(matName, studyName, metaPara = metaPara)
 
     # build meta data (phenotype data) file
     metafile = 'meta.tsv'
@@ -162,10 +162,10 @@ def adataToXena(adata, path, studyName, transpose = True, unit = None):
                 mapName = "tsne"
                 dataSubType = 'embedding'
             elif map == 'X_spatial':
-                mapName = 'spatial'
+                mapName = 'spatial map'
                 dataSubType = 'spatial'
             elif map == 'spatial': # visium
-                mapName = 'spatial'
+                mapName = 'spatial map'
                 dataSubType = 'spatial'
             else:
                 print("unrecognized map:", map)
@@ -281,7 +281,9 @@ def visiumToXena(visiumDataDir, outputpath, studyName):
     adata = sc.read_visium(visiumDataDir, count_file = count_file)
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
-    unit = "log(count+1)"
-    adataToXena(adata, outputpath, studyName, unit = unit)
+    metaPara = {}
+    metaPara['unit'] = "log(count+1)"
+    metaPara['wrangling_procedure'] = "download filtered_feature_bc_matrix.h5, normalize count data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"
+    adataToXena(adata, outputpath, studyName, metaPara = metaPara)
 
 

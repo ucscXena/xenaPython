@@ -50,14 +50,6 @@ def buildsjson_map (output, map_meta, cohort, label = None):
     J['version'] = datetime.date.today().isoformat()
 
     J['map'] = map_meta
-    '''
-    for map_info in map_meta:
-        J['map'].append({
-            'label': map_info['label'],
-            'dataSubType':  map_info['dataSubType'],
-            'dimension': map_info['dimension']
-            })
-    '''
     json.dump(J, fout, indent = 4)
     fout.close()
 
@@ -148,27 +140,30 @@ def adataToXena(adata, path, studyName, transpose = True, metaPara = None):
     if adata.obsm is not None:
         import numpy, pandas as pd
 
-        dfs = []
-        dfs_meta =[]
         for map in adata.obsm.keys():
             cols =[]
-            if map == 'X_pca':
-                mapName = "pca"
-                dataSubType = 'embedding'
-            elif map == 'X_umap':
+            if map == 'X_umap':
                 mapName = "umap"
                 dataSubType = 'embedding'
+                label = 'umap'
+                map_file = 'umap.tsv'
             elif map == 'X_tsne':
                 mapName = "tsne"
                 dataSubType = 'embedding'
+                label = 'tsne'
+                map_file =  'tsne.tsv'
             elif map == 'X_spatial':
-                mapName = 'spatial map'
+                mapName = 'spatial_map'
                 dataSubType = 'spatial'
+                label = 'spatial map'
+                map_file =  'spatial_map.tsv'
             elif map == 'spatial': # visium
-                mapName = 'spatial map'
+                mapName = 'spatial_map'
                 dataSubType = 'spatial'
+                label = 'spatial map'
+                map_file =  'spatial_map.tsv'
             else:
-                print("unrecognized map:", map)
+                print("unrecognized or ignored map:", map)
                 continue
 
             row,col = adata.obsm[map].shape
@@ -182,21 +177,14 @@ def adataToXena(adata, path, studyName, transpose = True, metaPara = None):
 
 
             df = df.set_index(adata.obs.index)
-            dfs.append(df)
-            dfs_meta.append({
-                'label': mapName,
+            df_meta = [{
+                'label': label,
                 'dataSubType': dataSubType,
                 'dimension':cols
-                })
+            }]
 
-        if len(dfs) > 0:
-            result = pd.concat(dfs, axis=1)
-
-            map_file = 'map.tsv'
-            label = "map"
-
-            result.to_csv(join(path, map_file), sep='\t')
-            buildsjson_map(join(path, map_file), dfs_meta, studyName, label)
+            df.to_csv(join(path, map_file), sep='\t')
+            buildsjson_map(join(path, map_file), df_meta, studyName, label)
 
 def starfishExpressionMatrixToXena(mat, path, studyName):
     """
@@ -281,6 +269,18 @@ def visiumToXena(visiumDataDir, outputpath, studyName):
     adata = sc.read_visium(visiumDataDir, count_file = count_file)
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
+
+    n_components = 3
+
+    #PCA
+    sc.tl.pca(adata, svd_solver='arpack')
+
+    # UMAP 3D
+    import umap
+    dens_lambda= 1 # default = 2
+    embedding = umap.UMAP(densmap=True, n_components = n_components, dens_lambda= dens_lambda).fit(adata.obsm['X_pca'])
+    adata.obsm['X_umap'] = embedding.embedding_
+
     metaPara = {}
     metaPara['unit'] = "log(count+1)"
     metaPara['wrangling_procedure'] = "download filtered_feature_bc_matrix.h5, normalize count data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"

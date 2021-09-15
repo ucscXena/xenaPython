@@ -286,4 +286,45 @@ def visiumToXena(visiumDataDir, outputpath, studyName):
     metaPara['wrangling_procedure'] = "download filtered_feature_bc_matrix.h5, normalize count data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"
     adataToXena(adata, outputpath, studyName, metaPara = metaPara)
 
+def vizgenToXena(vizgenDataDir, outputpath, studyName):
+    """
+    Given a vizgen output data directory, write dataset to a dataset directory under path.
+    """
+    # https://f.hubspotusercontent40.net/hubfs/9150442/Vizgen%20MERFISH%20Mouse%20Receptor%20Map%20File%20Descriptions%20.pdf?__hstc=30510752.65b077e2f6b41ba4f2e0c44a2103598e.1631299341334.1631299341334.1631299341334.1&__hssc=30510752.3.1631299341334&__hsfp=3105977984&hsCtaTracking=f0a4edb5-afb5-4b5c-b3fe-5b73da111821%7Ce87c6069-24f9-4538-a9a1-e54304c082b2
+
+    for file in os.listdir(vizgenDataDir):
+        import re
+        exp_pattern = 'cell_by_gene.*csv$'
+        meta_pattern = 'cell_metadata.*csv$'
+        if re.search(exp_pattern, file):
+            count_file = file
+            print (count_file)
+        if re.search(meta_pattern, file):
+            meta_file = file
+            print(meta_file)
+
+    import pandas as pd
+    adata = sc.read_csv(count_file, first_column_names = True)
+    meta_cell = pd.read_csv(meta_file, index_col=0)
+    adata.obs = meta_cell
+
+    sc.pp.normalize_total(adata, inplace=True)
+    sc.pp.log1p(adata)
+
+    n_components = 3
+
+    #PCA
+    sc.tl.pca(adata, svd_solver='arpack')
+
+    # UMAP 3D
+    import umap
+    dens_lambda= 1 # default = 2
+    embedding = umap.UMAP(densmap=True, n_components = n_components, dens_lambda= dens_lambda).fit(adata.obsm['X_pca'])
+    adata.obsm['X_umap'] = embedding.embedding_
+
+    metaPara = {}
+    metaPara['unit'] = "log(count+1)"
+    metaPara['wrangling_procedure'] = "download cell_by_gene.csv, normalize count data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"
+    adataToXena(adata, outputpath, studyName, metaPara = metaPara)
+
 

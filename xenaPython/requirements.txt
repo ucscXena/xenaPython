@@ -1,0 +1,7 @@
+# optional requirements needed in convert
+pandas
+scanpy
+umap
+umap-learn
+leidenalg
+louvain

@@ -255,18 +255,9 @@ def h5adToXena(h5adFname, outputpath, studyName):
     adata = sc.read(h5adFname, first_column_names=True)
     adataToXena(adata, outputpath, studyName)
 
-def visiumToXena(visiumDataDir, outputpath, studyName):
-    """
-    Given a visium spaceranger output data directory, write dataset to a dataset directory under path.
-    """
-    # https://scanpy.readthedocs.io/en/stable/api/scanpy.read_visium.html
+def basic_analysis(adata):
+    # normalize_total, log1p, pca, 3D umap (dense) and clustering (leiden, louvain)
 
-    for file in os.listdir(visiumDataDir):
-        if file.endswith("filtered_feature_bc_matrix.h5"):
-            count_file = file
-            print (count_file)
-
-    adata = sc.read_visium(visiumDataDir, count_file = count_file)
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
 
@@ -280,6 +271,27 @@ def visiumToXena(visiumDataDir, outputpath, studyName):
     dens_lambda= 1 # default = 2
     embedding = umap.UMAP(densmap=True, n_components = n_components, dens_lambda= dens_lambda).fit(adata.obsm['X_pca'])
     adata.obsm['X_umap'] = embedding.embedding_
+
+    # clustering
+    sc.pp.neighbors(adata, n_pcs=20)
+    sc.tl.leiden(adata)
+    sc.tl.louvain(adata)
+    return adata
+
+def visiumToXena(visiumDataDir, outputpath, studyName):
+    """
+    Given a visium spaceranger output data directory, write dataset to a dataset directory under path.
+    """
+    # https://scanpy.readthedocs.io/en/stable/api/scanpy.read_visium.html
+
+    for file in os.listdir(visiumDataDir):
+        if file.endswith("filtered_feature_bc_matrix.h5"):
+            count_file = file
+            print (count_file)
+
+    adata = sc.read_visium(visiumDataDir, count_file = count_file)
+    
+    adata = basic_analysis(adata)
 
     metaPara = {}
     metaPara['unit'] = "log(count+1)"
@@ -308,19 +320,7 @@ def vizgenToXena(vizgenDataDir, outputpath, studyName):
     meta_cell = pd.read_csv(meta_file, index_col=0)
     adata.obs = meta_cell
 
-    sc.pp.normalize_total(adata, inplace=True)
-    sc.pp.log1p(adata)
-
-    n_components = 3
-
-    #PCA
-    sc.tl.pca(adata, svd_solver='arpack')
-
-    # UMAP 3D
-    import umap
-    dens_lambda= 1 # default = 2
-    embedding = umap.UMAP(densmap=True, n_components = n_components, dens_lambda= dens_lambda).fit(adata.obsm['X_pca'])
-    adata.obsm['X_umap'] = embedding.embedding_
+    adata = basic_analysis(adata)
 
     metaPara = {}
     metaPara['unit'] = "log(count+1)"

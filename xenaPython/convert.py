@@ -256,7 +256,7 @@ def h5adToXena(h5adFname, outputpath, studyName):
     adataToXena(adata, outputpath, studyName)
 
 def basic_analysis(adata):
-    # normalize_total, log1p, pca, 3D umap (dense) and clustering (leiden, louvain)
+    # normalize_total_count, log1p, pca, 3D umap (dense) and clustering (leiden, louvain)
 
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)

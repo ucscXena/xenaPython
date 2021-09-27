@@ -256,7 +256,7 @@ def h5adToXena(h5adFname, outputpath, studyName):
     adataToXena(adata, outputpath, studyName)
 
 def basic_analysis(adata):
-    # normalize_total_count, log1p, pca, 3D umap (dense) and clustering (leiden, louvain)
+    # normalize_total_count (or intensity), log1p, pca, 3D umap (dense) and clustering (leiden, louvain)
 
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
@@ -327,4 +327,36 @@ def vizgenToXena(vizgenDataDir, outputpath, studyName):
     metaPara['wrangling_procedure'] = "download cell_by_gene.csv, normalize count data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"
     adataToXena(adata, outputpath, studyName, metaPara = metaPara)
 
+def sprmToXena(sprmDataDir, outputpath, studyName):
+    """
+    Given a SPRM output data directory, write dataset to a dataset directory under path.
+    """
+    # https://github.com/hubmapconsortium/sprm
+    # https://github.com/hubmapconsortium/codex-pipeline
+    # https://view.commonwl.org/workflows/github.com/hubmapconsortium/codex-pipeline/blob/f3d6e97408b1c542641b313c1ea8d3115d72e3f8/pipeline.cwl
 
+    for file in os.listdir(sprmDataDir):
+        import re
+        exp_pattern = 'cell_channel_mean.csv$'
+        meta_pattern = 'cell_centers.csv$'
+        if re.search(exp_pattern, file):
+            count_file = file
+            print (count_file)
+        if re.search(meta_pattern, file):
+            meta_file = file
+            print(meta_file)
+
+    import pandas as pd
+    adata = sc.read_csv(count_file, first_column_names = True)
+    meta_cell = pd.read_csv(meta_file, index_col=0, names=['y','x'])  # the hubmap current output from sprm (2021-09) might have the header x and y swapped
+    meta_cell.index = meta_cell.index.astype(str)
+    meta_cell = meta_cell.filter(items = list(adata.obs_names), axis=0)
+    adata.obs = meta_cell
+
+    adata = basic_analysis(adata)
+
+    metaPara = {}
+    metaPara['dataSubtype'] = 'protein expression'
+    metaPara['unit'] = "log(intensity+1)"
+    metaPara['wrangling_procedure'] = "download cell_channel_mean.csv, normalize cell mean intensity data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"
+    adataToXena(adata, outputpath, studyName, metaPara = metaPara)

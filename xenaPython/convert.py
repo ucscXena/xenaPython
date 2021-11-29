@@ -268,7 +268,8 @@ def basic_analysis(adata):
 
     # UMAP 3D
     import umap
-    dens_lambda= 1 # default = 2
+    # run umap in dense mode  https://www.nature.com/articles/s41587-020-00801-7
+    dens_lambda = 1 # default = 2
     embedding = umap.UMAP(densmap=True, n_components = n_components, dens_lambda= dens_lambda).fit(adata.obsm['X_pca'])
     adata.obsm['X_umap'] = embedding.embedding_
 

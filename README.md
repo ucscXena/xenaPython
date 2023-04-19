@@ -8,11 +8,11 @@ Python API for Xena Hub
 
 
 #### Installation
-    pip install xenaPython
+    pip install 'git+https://github.com/ucscXena/xenaPython'
 
 
 #### Upgrade Installation
-    pip install --upgrade xenaPython
+    pip install --upgrade 'git+https://github.com/ucscXena/xenaPython'
 
 
 #### Usage

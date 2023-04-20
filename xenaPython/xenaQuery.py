@@ -87,7 +87,6 @@ def strip_first_url_dir(path):
 def name_to_url(base_url, name):
     return base_url.replace('/proj/', '/download/') + strip_first_url_dir(name)
 
-
 # The strategy here is
 #   o Do table scan on code to find codes matching field values
 #   o Do IN query on unpack(field, x) to find rows matching codes
@@ -99,89 +98,6 @@ def name_to_url(base_url, name):
 # enumerated values are unique. An alternative would be to index all the enumerated
 # values in the db.
 
-cohort_query_str = """
-(map :cohort (query {:select [:%distinct.cohort]
-                     :from [:dataset]
-                     :where [:not [:is nil :cohort]]}))
-"""
-
-all_samples_query = """
-(map :value (query {:select [:%%distinct.value]
-                    :from [:dataset]
-                    :join [:field [:= :dataset.id :dataset_id]
-                           :code [:= :field_id :field.id]]
-                    :where [:and [:= :cohort %s]
-                                 [:= :field.name "sampleID"]]}))
-"""
-
-datasets_list_in_cohort_str = """
-(map :name (query {:select [:name :type :datasubtype :probemap :text :status]
-      :from [:dataset]
-      :where [:= :cohort %s]}))
-"""
-
-datasets_list_str = """
-(map :name (query {:select [:name :type :datasubtype :probemap :text :status]
-      :from [:dataset]}))
-"""
-
-dataset_type_str = """
-(map :type (query {:select [:type]
-                   :from [:dataset]
-                   :where [:= :name %s]}))
-"""
-
-dataset_field_str = """
-(map :name (query {:select [:field.name]
-             :from [:dataset]
-             :join [:field [:= :dataset.id :dataset_id]]
-             :where [:= :dataset.name %s]}))
-"""
-
-dataset_samples_str = """
-(map :value (query {:select [:value]
-            :from [:dataset]
-            :join [:field [:= :dataset.id :dataset_id]
-            :code [:= :field.id :field_id]]
-            :where [:and
-            [:= :dataset.name %s]
-            [:= :field.name "sampleID"]]}))
-"""
-
-dataset_probe_str = """
-(fetch [{:table %s
-      :columns %s
-      :samples %s}])
-"""
-
-
-dataset_gene_probes_str = """
-           (let [probemap (:probemap (car (query {:select [:probemap]
-                                                  :from [:dataset]
-                                                  :where [:= :name %s]})))
-                 probes ((xena-query {:select ["name"] :from [probemap] :where [:in :any "genes" %s]}) "name")]
-             [probes
-               (fetch [{:table %s
-                        :samples %s
-                        :columns probes}])])
-"""
-
-
-dataset_gene_str = """
-(let [probemap (:probemap (car (query {:select [:probemap]
-                                      :from [:dataset]
-                                      :where [:= :name %s]})))
-     probes-for-gene (fn [gene] ((xena-query {:select ["name"] :from [probemap] :where [:in :any "genes" [gene]]}) "name"))
-     avg (fn [scores] (mean scores 0))
-     scores-for-gene (fn [gene]
-         (let [probes (probes-for-gene gene)
-               scores (fetch [{:table %s
-                               :samples %s
-                               :columns (probes-for-gene gene)}])]
-           {:gene gene
-            :scores (if (car probes) (avg scores) [[]])}))]
- (map scores-for-gene %s))
-"""
 
 import json
 try:
@@ -201,59 +117,6 @@ def post(url, query):
     response = urlopen(req)
     result = response.read().decode('utf-8')
     return result
-
-def all_samples(host, cohort):
-    """return all the samples belong to a cohort on a hub host"""
-    return json.loads(post(host, all_samples_query % quote(cohort)))
-
-def find_sample_by_field_query(cohort, field, values):
-    """Return a xena query which looks up sample ids for the given field=values."""
-    return sample_query_str % (quote(cohort), quote(field), array_fmt(values))
-
-def patient_to_sample_query(cohort, patients):
-    """Return a xena query which looks up sample ids for the given patients."""
-    return find_sample_by_field_query(cohort, "_PATIENT", patients)
-
-def all_cohorts(url):
-    """ Return a list of cohorts on a host """
-    """ return example: ["chinSF2007_public","TCGA.BRCA.sampleMap","cohort3"] """
-    return json.loads(post(url,cohort_query_str))
-
-def dataset_field (host, dataset):
-    """return probes or features of a dataset"""
-    return json.loads(post(host, dataset_field_str % (quote(dataset))))
-
-def datasets_list_in_cohort (host, cohort):
-    """return datasets in a cohort"""
-    return json.loads(post(host, datasets_list_in_cohort_str % (quote(cohort))))
-
-def dataset_samples (host, dataset):
-    return json.loads(post(host, dataset_samples_str % (quote(dataset))))
-
-def datasets_list (host):
-    return json.loads(post(host, datasets_list_str))
-
-def dataset_probe_values (host, dataset, samples, probes):
-    """ return matrix of values [[x11, x12, ...],[x21, x22,...],...]"""
-    """ x11: sample 1 and probe 1"""
-    """ x12: sample 2 and probe 1"""
-    """ x21: sample 1 and probe 2"""
-    """ x22: sample 2 and probe 2"""
-    return json.loads(post(host, dataset_probe_str % (quote(dataset), array_fmt(probes), array_fmt(samples))))
-
-def dataset_gene_values (host, dataset, samples, genes):
-    """ return matrix of values [[x11, x12, ...],[x21, x22,...],...]"""
-    """ x11: sample 1 and gene 1"""
-    """ x12: sample 2 and gene 1"""
-    """ x21: sample 1 and gene 2"""
-    """ x22: sample 2 and gene 2"""
-    return json.loads(post(host, dataset_gene_str % (quote(dataset), quote(dataset), array_fmt(samples), array_fmt(genes))))
-
-def dataset_gene_probes_values (host,dataset,samples, gene):
-    return json.loads(post(host, dataset_gene_probes_str % (quote(dataset), array_fmt([gene]), quote(dataset), array_fmt(samples))))
-
-def dataset_type (host, dataset):
-    return json.loads(post(host, dataset_type_str % (quote(dataset))))
 
 def quote(s):
     "quote a string value"

@@ -88,6 +88,7 @@ Python API for Xena Hub
         xenafield = list(filter(lambda f: f[0] == target_feature, features))
         if len(xenafield) == 0:
             print (target_feature, "not found")
+            return [None, None]
         elif len(xenafield) == 1:
             dataset = xenafield[0][1]
             # query to get all the data from the target_feature
@@ -101,15 +102,17 @@ Python API for Xena Hub
             codes = getFeatureCodes(hub, dataset, target_feature)
             if codes:
                 data = [codes[int(x)] if x != 'NaN' else 'NaN' for x in data]
-            print (data)
+            return [samples, data]
         else:
             print ("there are more than one features match", target_feature)
-    
+            return [None, None]
+
     hub = 'https://tcga.xenahubs.net'
     cohort = 'TCGA Ovarian Cancer (OV)'
     target_feature = 'age_at_initial_pathologic_diagnosis'
     target_feature = 'sample_type'
-    getClinicalData(hub, cohort, target_feature)
+    [samples, data] = getClinicalData(hub, cohort, target_feature)
+    samples, data
     
 ##### 9. Find out hub id, cohort id, dataset id
     use xena browser datasets tool:  https://xenabrowser.net/datapages/

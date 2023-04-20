@@ -1,5 +1,5 @@
 # xenaPython
-Python API for Xena Hub
+Python API for querying Xena Hub
 
 ---------
 

@@ -112,7 +112,7 @@ Python API for Xena Hub
     target_feature = 'age_at_initial_pathologic_diagnosis'
     target_feature = 'sample_type'
     [samples, data] = getClinicalData(hub, cohort, target_feature)
-    samples, data
+    samples[:10], data[:10]
     
 ##### 9. Find out hub id, cohort id, dataset id
     use xena browser datasets tool:  https://xenabrowser.net/datapages/

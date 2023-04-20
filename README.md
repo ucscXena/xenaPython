@@ -77,41 +77,31 @@ Python API for Xena Hub
     def getClinicalData(hub, cohort, target_feature):
         # find out all the datafiles (i.e. datasets) belong to a cohort
         datasets = xena.dataset_list(hub, [cohort])
-
         # filter to just clinicalMatrix type of data files
         datasets = list(filter(lambda x: x['type'] == 'clinicalMatrix', datasets))
-
         # collect all the phynotype features and their associated dataset from all the clinicalMatrix datasets
         features = []
         for dataset in datasets:
             for feature in xena.dataset_field(hub, dataset['name']):
                 features.append([feature, dataset['name']])
-
         # find the target_feature among all the features, and the dataset it comes from 
         xenafield = list(filter(lambda f: f[0] == target_feature, features))
-
         if len(xenafield) == 0:
             print (target_feature, "not found")
-
         elif len(xenafield) == 1:
             dataset = xenafield[0][1]
-
             # query to get all the data from the target_feature
-
             # first, get all the samples in the cohort (a bit slower) 
             # samples = xena.cohort_samples(hub, cohort, None)
             # all the samples in the dataset (a bit faster), either will work, 		
             samples = xena.dataset_samples(hub, dataset, None)
-
             # second, get the data
             [position, [data]] = xena.dataset_probe_values (hub, dataset, samples, [target_feature])
-
             # thrid, identify feature is categorical or continuous, if it is categorical, there will be codes associated with it,
             codes = getFeatureCodes(hub, dataset, target_feature)
             if codes:
                 data = [codes[int(x)] if x != 'NaN' else 'NaN' for x in data]
             print (data)
-
         else:
             print ("there are more than one features match", target_feature)
     

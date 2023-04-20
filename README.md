@@ -65,7 +65,8 @@ Python API for Xena Hub
     hub = "https://tcga.xenahubs.net"
     xena.all_cohorts(hub, [])
 
-##### 8. Get a cohort's clinical/phenotypic data of a particular feature, two examples provided: a categorical feature and a continuous feature
+##### 8. Get data of a particular clinical/phenotypic feature from a cohort. This is assume that all the clinical/phenotype data of the cohort is on a single hub. 
+#####    two examples provided: a categorical feature and a continuous feature
     def getFeatureCodes(hub, dataset, feature):
         # identify feature is categorical or continuous, if it is categorical, there will be codes associated with it, otherwise, codes will be none
         codes = xena.field_codes(hub, dataset, [feature])[0]['code']

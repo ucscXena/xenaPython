@@ -23,7 +23,6 @@ import re
 import os.path
 import sys
 
-from . import xenaAPI
 from . import xenaQuery
 
 PUBLIC_HUBS = {

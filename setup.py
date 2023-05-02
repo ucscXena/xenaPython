@@ -10,8 +10,5 @@ setup(
     description = 'XENA python API',
     url = 'https://github.com/ucscXena/xenaPython',
     keywords = ['xena', 'ucsc', 'xenaAPI', 'xenaPython'],
-    license='Apache 2.0',
-    extras_require={
-        "convert": ["scanpy", "loompy"],
-    }
+    license='Apache 2.0'
 )

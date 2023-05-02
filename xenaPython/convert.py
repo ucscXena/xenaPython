@@ -2,6 +2,7 @@ from os.path import join, isfile, isdir
 import os, sys
 import datetime, json
 import scanpy as sc
+import pandas as pd
 
 def dim_name(mapName, dim):
     return mapName + '_' + str(dim+1)
@@ -37,11 +38,11 @@ def buildsjson_phenotype(output, cohort, label = None):
     json.dump(J, fout, indent = 4)
     fout.close()
 
-def buildsjson_map (output, map_meta, cohort, label = None):
+def buildsjson_map (output, map_type, map_meta, cohort, label = None):
     fout = open(output +'.json', 'w')
     J = {}
     J['type'] ='clinicalMatrix'
-    J['dataSubtype'] = 'maps'
+    J['dataSubtype'] = map_type
     if label:
         J['label'] = label
     else:
@@ -53,8 +54,22 @@ def buildsjson_map (output, map_meta, cohort, label = None):
     json.dump(J, fout, indent = 4)
     fout.close()
 
+def buildsjson_cluster(output, cluster_meta, cohort, label = None):
+    fout = open(output +'.json', 'w')
+    J = {}
+    J['type'] ='clinicalMatrix'
+    J['dataSubtype'] = 'phenotype'
+    if label:
+        J['label'] = label
+    else:
+        J['label'] = os.path.basename(output)
+    J['cohort'] = cohort
+    J['version'] = datetime.date.today().isoformat()
+    J['cellCluster'] = cluster_meta
+    json.dump(J, fout, indent = 4)
+    fout.close()
 
-def anndataMatrixToTsv(adata, matFname, transpose = True):
+def anndataMatrixToTsv(adata, matFname, transpose = True, geneColumn = "var.index"):
     """
     write adata expression matrix to .tsv file"
     """
@@ -83,7 +98,10 @@ def anndataMatrixToTsv(adata, matFname, transpose = True):
     ofh.write("\n")
 
     if (transpose):
-        genes = var.index.tolist()
+        if geneColumn == "var.index":
+            genes = var.index.tolist()
+        else:
+            genes = var[geneColumn].tolist()
     else:
         genes = obs.genes.tolist()
     print("Writing %d genes in total" % len(genes))
@@ -104,7 +122,7 @@ def anndataMatrixToTsv(adata, matFname, transpose = True):
     ofh.close()
 
 
-def adataToXena(adata, path, studyName, transpose = True, metaPara = None):
+def adataToXena(adata, path, studyName, transpose = True, metaPara = None, geneColumn = "var.index"):
     """
     Given an anndata (adata) object, write dataset to a dataset directory under path.
     """
@@ -118,27 +136,35 @@ def adataToXena(adata, path, studyName, transpose = True, metaPara = None):
     if isfile(matName):
         overwrite  = input("%s already exists. Overwriting existing files? Yes or No: " % matName)
         if overwrite.upper() == "YES":
-            anndataMatrixToTsv(adata, matName, transpose)
+            anndataMatrixToTsv(adata, matName, transpose = transpose, geneColumn = geneColumn)
     else:
-        anndataMatrixToTsv(adata, matName, transpose)
+        anndataMatrixToTsv(adata, matName, transpose = transpose, geneColumn = geneColumn)
     
     # build expression data .json file
     buildsjson_scRNA_geneExp(matName, studyName, metaPara = metaPara)
 
-    # build meta data (phenotype data) file
+    # build cell meta data (phenotype data) file, without the cluster columns
     metafile = 'meta.tsv'
     metaName = join(path, metafile)
     if (transpose):
-        adata.obs.to_csv(metaName, sep='\t')
+        adata.obs.loc[:, ~adata.obs.columns.isin(['leiden', 'louvain'])].to_csv(metaName, sep='\t')
     else:
-        adata.var.to_csv(metaName, sep='\t')
+        adata.var.loc[:, ~adata.var.columns.isin(['leiden', 'louvain'])].to_csv(metaName, sep='\t')
 
-    # build meta data .json file
-    buildsjson_phenotype(metaName, studyName)
+    # build cell meta data .json file
+    buildsjson_phenotype(metaName, studyName, label="cell metadata")
 
-    # pca, tsne, umap, spatial coordinates
+    # build maps and the associated matadata
+    adataToMap(adata, path, studyName)
+
+    # build cluster and associated metadata
+    assayDataset = expfile
+    adataToCluster(adata, path, studyName, assayDataset)  
+
+def adataToMap(adata, path, studyName):
+    # tsne, umap, spatial coordinates
     if adata.obsm is not None:
-        import numpy, pandas as pd
+        import numpy
 
         for map in adata.obsm.keys():
             cols =[]
@@ -179,12 +205,55 @@ def adataToXena(adata, path, studyName, transpose = True, metaPara = None):
             df = df.set_index(adata.obs.index)
             df_meta = [{
                 'label': label,
-                'dataSubType': dataSubType,
+                'type': dataSubType,
                 'dimension':cols
             }]
 
             df.to_csv(join(path, map_file), sep='\t')
-            buildsjson_map(join(path, map_file), df_meta, studyName, label)
+            map_type = dataSubType
+            buildsjson_map(join(path, map_file), map_type, df_meta, studyName, label)
+
+
+def adataToCluster (adata, path, studyName, assayDataset):
+    df = pd.DataFrame()
+    cluster_file = 'cluster.tsv'
+    label = 'cell clusters'
+    df_meta = []
+
+    for cluster in adata.obs.keys():
+        if cluster == 'leiden':
+            df['leiden'] = adata.obs['leiden']
+            feature = 'leiden'
+            assay = 'scanpy leiden'
+            assayDataset = assayDataset
+            assayDatasetLabel = 'scRNA-seq'
+            assayParameter = 'default parameter'
+
+        elif cluster == 'louvain':
+            df['louvain'] = adata.obs['louvain']
+            feature = 'louvain'
+            assay = 'scanpy louvain'
+            assayDataset = assayDataset
+            assayDatasetLabel = 'scRNA-seq'
+            assayParameter = 'default parameter'
+        else:
+            continue
+
+        df_meta.append({
+            'feature': feature,
+            'assay': assay,
+            'assayParameter': assayParameter,
+            'assayDataset': {
+                'host': './',
+                'name': assayDataset
+            },
+            'assayDatasetLabel': assayDatasetLabel
+        })
+
+    if len(df.columns) >0:
+        df.to_csv(join(path, cluster_file), sep='\t')
+        buildsjson_cluster(join(path, cluster_file), df_meta, studyName, label)
+
 
 def starfishExpressionMatrixToXena(mat, path, studyName):
     """
@@ -252,16 +321,21 @@ def h5adToXena(h5adFname, outputpath, studyName):
     """
     Given a h5ad file, write dataset to a dataset directory under path.
     """
-    adata = sc.read(h5adFname, first_column_names=True)
+    adata = sc.read_h5ad(h5adFname)
     adataToXena(adata, outputpath, studyName)
 
-def basic_analysis(adata):
+def basic_analysis(adata, normalization = True):
     # normalize_total_count (or intensity), log1p, pca, 3D umap (dense) and clustering (leiden, louvain)
 
-    sc.pp.normalize_total(adata, inplace=True)
-    sc.pp.log1p(adata)
-
     n_components = 3
+
+    if (normalization):
+        sc.pp.filter_cells(adata, min_genes=0)
+        sc.pp.filter_cells(adata, min_counts=0)
+        sc.pp.normalize_total(adata, inplace=True)
+        sc.pp.log1p(adata)
+
+    sc.pp.highly_variable_genes(adata)
 
     #PCA
     sc.tl.pca(adata, svd_solver='arpack')
@@ -279,23 +353,24 @@ def basic_analysis(adata):
     sc.tl.louvain(adata)
     return adata
 
-def visiumToXena(visiumDataDir, outputpath, studyName):
+def visiumToXena(visiumDataDir, count_file, outputpath, studyName):
     """
     Given a visium spaceranger output data directory, write dataset to a dataset directory under path.
     """
     # https://scanpy.readthedocs.io/en/stable/api/scanpy.read_visium.html
 
-    for file in os.listdir(visiumDataDir):
-        if file.endswith("filtered_feature_bc_matrix.h5"):
-            count_file = file
-            print (count_file)
+    if not (count_file.endswith("filtered_feature_bc_matrix.h5")):
+        print (count_file, "is not the correct format")
+        sys.exit()
+    else:
+        print (count_file)
 
     adata = sc.read_visium(visiumDataDir, count_file = count_file)
     
     adata = basic_analysis(adata)
 
     metaPara = {}
-    metaPara['unit'] = "log(count+1)"
+    metaPara['unit'] = "LogNorm(count+1)"
     metaPara['wrangling_procedure'] = "download filtered_feature_bc_matrix.h5, normalize count data using scanpy sc.pp.normalize_total(adata), then sc.pp.log1p(adata)"
     adataToXena(adata, outputpath, studyName, metaPara = metaPara)
 
@@ -316,7 +391,6 @@ def vizgenToXena(vizgenDataDir, outputpath, studyName):
             meta_file = file
             print(meta_file)
 
-    import pandas as pd
     adata = sc.read_csv(count_file, first_column_names = True)
     meta_cell = pd.read_csv(meta_file, index_col=0)
     adata.obs = meta_cell
